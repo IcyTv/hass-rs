@@ -182,7 +182,7 @@ impl HassClient {
     /// If the client supplies valid authentication, the authentication phase will complete by the server sending the auth_ok message.
     /// If the data is incorrect, the server will reply with auth_invalid message and disconnect the session.
 
-    pub async fn auth_with_longlivedtoken(&mut self, token: &str) -> HassResult<()> {
+    pub async fn auth_with_longlivedtoken(&self, token: &str) -> HassResult<()> {
         let auth_message = Command::AuthInit(Auth {
             msg_type: "auth".to_owned(),
             access_token: token.to_owned(),
@@ -200,7 +200,7 @@ impl HassClient {
 
     /// The API supports receiving a ping from the client and returning a pong.
     /// This serves as a heartbeat to ensure the connection is still alive.
-    pub async fn ping(&mut self) -> HassResult<()> {
+    pub async fn ping(&self) -> HassResult<()> {
         let id = self.next_seq();
 
         let ping_req = Command::Ping(Ask {
@@ -220,7 +220,7 @@ impl HassClient {
     /// This will get the current config of the Home Assistant.
     ///
     /// The server will respond with a result message containing the config.
-    pub async fn get_config(&mut self) -> HassResult<HassConfig> {
+    pub async fn get_config(&self) -> HassResult<HassConfig> {
         let id = self.next_seq();
 
         let config_req = Command::GetConfig(Ask {
@@ -243,7 +243,7 @@ impl HassClient {
     ///
     /// The server will respond with a result message containing the states.
 
-    pub async fn get_states(&mut self) -> HassResult<Vec<HassEntity>> {
+    pub async fn get_states(&self) -> HassResult<Vec<HassEntity>> {
         let id = self.next_seq();
 
         let states_req = Command::GetStates(Ask {
@@ -266,7 +266,7 @@ impl HassClient {
     ///
     /// The server will respond with a result message containing the services.
 
-    pub async fn get_services(&mut self) -> HassResult<HassServices> {
+    pub async fn get_services(&self) -> HassResult<HassServices> {
         let id = self.next_seq();
         let services_req = Command::GetServices(Ask {
             id,
@@ -288,7 +288,7 @@ impl HassClient {
     ///
     /// The server will respond with a result message containing the current registered panels.
 
-    pub async fn get_panels(&mut self) -> HassResult<HassPanels> {
+    pub async fn get_panels(&self) -> HassResult<HassPanels> {
         let id = self.next_seq();
 
         let services_req = Command::GetPanels(Ask {
@@ -310,7 +310,7 @@ impl HassClient {
     /// This will get the current area registry list from Home Assistant.
     ///
     /// The server will respond with a result message containing the area registry list.
-    pub async fn get_area_registry_list(&mut self) -> HassResult<Vec<HassRegistryArea>> {
+    pub async fn get_area_registry_list(&self) -> HassResult<Vec<HassRegistryArea>> {
         let id = self.next_seq();
 
         let area_req = Command::GetAreaRegistryList(Ask {
@@ -332,7 +332,7 @@ impl HassClient {
     /// This will get the current device registry list from Home Assistant.
     ///
     /// The server will respond with a result message containing the device registry list.
-    pub async fn get_device_registry_list(&mut self) -> HassResult<Vec<HassRegistryDevice>> {
+    pub async fn get_device_registry_list(&self) -> HassResult<Vec<HassRegistryDevice>> {
         let id = self.next_seq();
 
         let device_req = Command::GetDeviceRegistryList(Ask {
@@ -354,7 +354,7 @@ impl HassClient {
     /// This will get the current entity registry list from Home Assistant.
     ///
     /// The server will respond with a result message containing the entity registry list.
-    pub async fn get_entity_registry_list(&mut self) -> HassResult<Vec<HassRegistryEntity>> {
+    pub async fn get_entity_registry_list(&self) -> HassResult<Vec<HassRegistryEntity>> {
         let id = self.next_seq();
 
         let entity_req = Command::GetEntityRegistryList(Ask {
@@ -381,7 +381,7 @@ impl HassClient {
     /// additional info : <https://developers.home-assistant.io/docs/api/rest> ==> Post `/api/services/<domain>/<service>`
 
     pub async fn call_service(
-        &mut self,
+        &self,
         domain: String,
         service: String,
         service_data: Option<Value>,
@@ -411,7 +411,7 @@ impl HassClient {
     /// The command subscribe_event will subscribe your client to the event bus.
     ///
     /// Returns a channel that will receive the subscription messages.
-    pub async fn subscribe_event(&mut self, event_name: &str) -> HassResult<Receiver<WSEvent>> {
+    pub async fn subscribe_event(&self, event_name: &str) -> HassResult<Receiver<WSEvent>> {
         let id = self.next_seq();
 
         let cmd = Command::SubscribeEvent(Subscribe {
@@ -434,7 +434,7 @@ impl HassClient {
     }
 
     /// Lists pending issues of the Home Assistant instance.
-    pub async fn list_issues(&mut self) -> HassResult<HassIssues> {
+    pub async fn list_issues(&self) -> HassResult<HassIssues> {
         let id = self.next_seq();
 
         let cmd = Command::ListRepairs(Ask {
@@ -455,7 +455,7 @@ impl HassClient {
     }
 
     /// send commands and receive responses from the gateway
-    pub(crate) async fn command(&mut self, cmd: Command, id: Option<u64>) -> HassResult<Response> {
+    pub(crate) async fn command(&self, cmd: Command, id: Option<u64>) -> HassResult<Response> {
         let cmd_tungstenite = cmd.to_tungstenite_message();
 
         let (tx, rx) = oneshot();
@@ -485,7 +485,7 @@ impl HassClient {
     }
 
     /// This will unsubscribe from an event subscription.
-    pub async fn unsubscribe_event(&mut self, subscription_id: u64) -> HassResult<()> {
+    pub async fn unsubscribe_event(&self, subscription_id: u64) -> HassResult<()> {
         let id = self.next_seq();
 
         let cmd = Command::Unsubscribe(Unsubscribe {
